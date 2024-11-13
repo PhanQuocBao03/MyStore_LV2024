@@ -103,7 +103,7 @@ const StockIn = ({ handleClose, open, stopPropagation, zone, locationId }) => {
               {tab==='stockOut'? <StockOut  locations={locations} stockIns={stockIns} handleClose={handleClose} />:(
               <div className="border-0 py-3 px-1.5 bg-blue-500 rounded-lg shadow-lg relative flex flex-col w-full outline-none focus:outline-none">
                 <div className="flex items-start justify-between border-b border-solid border-blueGray-200 rounded-t">
-                  <div className="flex gap-2 items-center">
+                  <div className="flex gap-2 items-center cursor-pointer" onClick={()=>setTab('categories')}>
                     <img src={CategoryIcon} className="w-4 h-4" alt="Category Icon" />
                     <h3 className="text-[14px] font-normal">Nhập sản phẩm</h3>
                   </div>
@@ -131,7 +131,7 @@ const StockIn = ({ handleClose, open, stopPropagation, zone, locationId }) => {
                         <p className="text-[12px] font-normal">Lưu</p>
                       </div>
                     )}
-                    <div className="items-center cursor-pointer" onClick={() => setTab('detail')}>
+                    <div className="items-center cursor-pointer" >
                       <div className="items-center text-center text-blue-800 text-[25px] w-6 h-6" onClick={handlePrint}>
                         <BiPrinter className="mt-[0.75px]" />
                       </div>

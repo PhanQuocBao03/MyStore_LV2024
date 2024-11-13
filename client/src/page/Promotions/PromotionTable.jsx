@@ -121,7 +121,7 @@ const PromotionTable = ({promotions}) => {
                                 <td className="pr-3 py-4" onClick={()=>handleOpenEdit(item._id)} >{item.promotionId}</td>
                                 <td className="pr-3 py-4" onClick={()=>handleOpenEdit(item._id)} >{item.name}</td>
 
-                                <td className="pr-3 py-4" onClick={()=>handleOpenEdit(item._id)} >{item.sale}%</td>
+                                <td className="pr-3 py-4" onClick={()=>handleOpenEdit(item._id)} >{FormatPrice (item.sale)}</td>
                                 <td className="pr-3 py-4" onClick={()=>handleOpenEdit(item._id)} >{FormatDay(item.startDate)}</td>
                                 <td className="pr-3 py-4" onClick={()=>handleOpenEdit(item._id)} >{ FormatDay(item.endDate)}</td>
                                 <td className="pr-3 py-4" onClick={()=>handleOpenEdit(item._id)} >{item.quantity}</td>

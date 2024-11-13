@@ -2,11 +2,11 @@ const Category = require("../models/CategorySchema");
 
 const createCategory = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name,group,photo } = req.body;
     if (!name) {
       return res.status(400).json({ message: "Tên là bắt buộc" });
     }
-    const existingCategory = await Category.findOne({ name });
+    const existingCategory = await Category.findOne({ name,group,photo });
     if (existingCategory) {
       return res.status(409).json({ message: "Tên danh mục đã tồn tại" });
     }

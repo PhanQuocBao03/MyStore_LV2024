@@ -222,4 +222,37 @@ const deleteAllProduct = async(req,res)=>{
         res.status(500).json({ success: false, error: error.message }); // Trả về mã lỗi 500 cho lỗi máy chủ
     }
 }
-module.exports = {createProduct,updateProduct,getSingleProduct,getAllProduct,deleteProduct,deleteAllProduct}
+const getProductWithCategoriesName = async (req, res) => {
+    try {
+        const { categories } = req.query;
+        let products;
+        if (categories) {
+            const itemCategory = await Category.findOne({ name: categories });
+            if (!itemCategory) {
+                return res.status(404).json({ 
+                    success: false, 
+                    message: `Không tìm thấy danh mục với tên ${categories}` 
+                });
+            }
+            products = await Product.find({ category: itemCategory._id });
+
+            if (products.length > 0) {
+                return res.status(200).json({ success: true, data: products });
+            } else {
+                return res.status(404).json({ 
+                    success: false, 
+                    message: `Không có sản phẩm nào thuộc danh mục ${categories}` 
+                });
+            }
+
+        } else {
+            return res.status(400).json({ success: false, message: "Danh mục không được để trống" });
+        }
+
+    } catch (error) {
+        console.error("Lỗi server", error.message);
+        return res.status(500).json({ success: false, message: "Lỗi máy chủ" });
+    }
+};
+
+module.exports = {createProduct,updateProduct,getSingleProduct,getAllProduct,deleteProduct,deleteAllProduct,getProductWithCategoriesName}

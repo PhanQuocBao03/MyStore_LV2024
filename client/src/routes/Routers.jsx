@@ -1,7 +1,7 @@
-import Home from "../page/Home"
+import Dashboard from "../page/Dashboard/Dashboard"
 import Login from "../page/Login";
 import Register from "../page/Signup"
-import ProtectedRoute from "./ProtectedRoute";
+// import ProtectedRoute from "./ProtectedRoute";
 import Orders from "../page/Orders/Order";
 import Employees from "../page/Employees/Employee";
 import Product from "../page/Products/Product";
@@ -17,8 +17,8 @@ import WarehouseManu from "../page/Warehouses/manufacture/manufacture";
 import {Routes,Route}from "react-router-dom"
 const Routers = () => {
     return <Routes>
-        <Route path="/" element={<ProtectedRoute allowedRoles={['admin']}><Home /></ProtectedRoute>} />
-        <Route path="/home" element={<ProtectedRoute allowedRoles={['admin']}><Home /></ProtectedRoute>} />
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login/>} />
         <Route path="/register" element={<Register/>} />
         <Route path="/product" element={<Product/>} />

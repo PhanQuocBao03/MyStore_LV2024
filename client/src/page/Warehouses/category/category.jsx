@@ -147,7 +147,7 @@ const Category = () => {
 
                         </div>
                         <div className="flex justify-center items-center">
-                            <table className="w-1/3 mt-5 text-sm text-center border-2 border-slate-300">
+                            <table className="w-2/3 mt-5 text-sm text-center border-2 border-slate-300">
                                 <thead className="text-xs uppercase border-b-2 border-b-slate-300">
                                     <tr>
                                         <th scope="col">
@@ -159,7 +159,10 @@ const Category = () => {
                                             />
                                         </th>
                                         <th scope="col">STT</th>
+                                        <th scope="col">Hình</th>
+
                                         <th scope="col">Tên</th>
+                                        <th scope="col">Nhóm</th>
                                         <th scope="col">Thao tác</th>
                                     </tr>
                                 </thead>
@@ -175,7 +178,12 @@ const Category = () => {
                                                 />
                                             </td>
                                             <td className="pr-3 py-4">{index + 1}</td>
+                                            <td className="pr-3 py-4 w-8">
+                                                <img src={items.photo} alt="" />
+                                            </td>
                                             <td className="pr-3 py-4">{items.name}</td>
+                                            <td className="pr-3 py-4">{items.group}</td>
+                                           
                                             <td className="pr-3 py-4 cursor-pointer" onClick={() => handleOpenEdit(items._id)}><FaEdit /> </td>
 
                                         </tr>))}

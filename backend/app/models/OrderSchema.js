@@ -26,6 +26,10 @@ const OrderSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    salePrice:{
+        type: Number,
+        default: 0
+    },
     totalAmount: {
         type: Number,
         default: 0
@@ -57,7 +61,7 @@ OrderSchema.pre(/^find/, function(next) {
         select: 'name address phone'
     }).populate({
         path:'products.product',
-        select:'name photo manuFacture price discount'
+        select:'name photo manuFacture price discount type'
     }); // Thay đổi đây để populate đúng
     next();
 });

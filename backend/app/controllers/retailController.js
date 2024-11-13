@@ -16,7 +16,7 @@ const createRetail = async (req, res) => {
         // Tạo đối tượng Retail mới
         const retail = new Retail({
             user: userId,
-            employee: employeeId,
+            employee: employeeId || null,
             salePrice: totalSale,
             totalAmount: totalAmountAfterDiscount,
             payment: payment || 'Tiền mặt',
@@ -29,8 +29,6 @@ const createRetail = async (req, res) => {
             if (!product) {
                 throw new Error(`Sản phẩm với ID ${item.productId} không tồn tại`);
             }
-
-            // Kiểm tra tồn kho
             if (product.stock < item.quantity) {
                 throw new Error(`Sản phẩm ${product.name} không đủ tồn kho`);
             }
@@ -55,8 +53,6 @@ const createRetail = async (req, res) => {
 
         // Chờ tất cả promise hoàn thành
         await Promise.all(productPromises);
-
-        // Cập nhật điểm cho người dùng dựa trên tổng tiền sau giảm giá
         if (totalAmountAfterDiscount > 0) {
             let userPoint = totalAmountAfterDiscount / 100; // 1 điểm cho mỗi 100 đơn vị tiền
             if (discount > 0) {
@@ -85,7 +81,7 @@ const createRetail = async (req, res) => {
 const getRetail = async (req, res) => {
     try {
         const retail = await Retail.find();
-        res.status(200).json({ retail });
+        res.status(200).json({ data:retail });
     } catch (error) {
         console.error(error);
         res.status(500).json({

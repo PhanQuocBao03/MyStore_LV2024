@@ -11,11 +11,13 @@
     import { FormatDay, FormatTime } from "../../utils/formatDay";
     import logo from "../../assets/images/logo.png";
     import FormatPrice from "../../utils/formatPrice";
+import { useContext } from "react";
+import { authContext } from "../../../../client_user/src/context/AuthContext";
     const ProductAddOrder = () => {
-        const userData = useMemo(() => JSON.parse(localStorage.getItem('user')), []);
-        const id = userData?._id;
+        const {user}=useContext(authContext)
         
-        const { data: carts } = id ? userFetchData(`${BASE_URL}/cart/${id}`) : { data: null };
+        
+        const { data: carts } = user._id ? userFetchData(`${BASE_URL}/cart/${user._id}`) : { data: null };
         const [query, setQuery] = useState('');
         const [debounceQuery, setDebounceQuery] = useState('');
         const [debounceVoucher, setDebounceVoucher] = useState('');
@@ -93,7 +95,7 @@
             products: [],
             userId: '',
             totalAmountAfterDiscount,
-            employeeId:id,
+            employeeId:user._id,
             discount,
             totalSale,
             promotionId:vouchers?._id,
@@ -240,7 +242,7 @@
                         </div>
                         <div className="flex gap-2">
                             <p className="text-[14px] font-bold col-span-1">NV:</p>
-                            <p>{userData?.employeeId}{userData?.name}</p>
+                            <p>{user?.employeeId}{user?.name}</p>
                         </div>
                     </div>
 

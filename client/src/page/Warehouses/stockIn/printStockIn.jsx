@@ -9,7 +9,6 @@ const PrintStockIn = ({ stockIn }) => {
     let totalPrice = 0; // Thêm biến để tính tổng giá trị
     const latestStockIn = stockIn
         .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-    console.log("stockin", latestStockIn);
 
     return (
         <div className="print-stockIn">

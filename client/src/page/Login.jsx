@@ -50,7 +50,7 @@ const Login = () => {
           if (result.role === "admin") {
             navigate("/");
           } else {
-            navigate("/home");
+            navigate("/dashboard");
           }
     
           toast.success(result.message);

@@ -8,18 +8,25 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import HashLoader from 'react-spinners/HashLoader';
 import useFetchData from '../../../Hook/userFecthData';
+import uploadImageToCloudinary from '../../../../../client_user/src/utils/uploadCloudinary';
 
 const EditCategoriesDialog = ({ open, handleClose, categoriesIds }) => {
+    const [selectedFile, setSelectedFile] = useState(null)
+    const [previewURL, setPreviewURL] = useState("")
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const { data: categories, loading: categoryLoading } = useFetchData(`${BASE_URL}/category/${categoriesIds}`);
 
-    const [formData, setFormData] = useState({ name: '' });
+    const [formData, setFormData] = useState({ name: '',group:'',photo:'' });
 
     // Khởi tạo formData khi tải dữ liệu danh mục thành công
     useEffect(() => {
         if (categories) {
-            setFormData({ name: categories.name });
+            setFormData({ 
+                name: categories.name, 
+                group:categories.group,
+                photo:categories.photo 
+            });
         }
     }, [categories]);
 
@@ -29,6 +36,14 @@ const EditCategoriesDialog = ({ open, handleClose, categoriesIds }) => {
             [e.target.name]: e.target.value
         }));
     };
+    const handleFileInputChange = async (event) =>{
+        const file = event.target.files[0];
+        const data = await uploadImageToCloudinary(file);
+        
+        setPreviewURL(data.url);
+        setSelectedFile(data.url);
+        setFormData({ ... formData, photo: data.url});
+    }
 
     const submitHandler = async (event) => {
         event.preventDefault();
@@ -48,7 +63,7 @@ const EditCategoriesDialog = ({ open, handleClose, categoriesIds }) => {
             }
             handleClose();
             toast.success(message);
-            navigate('/warehouse');
+            navigate('/warehouse/categories');
         } catch (error) {
             toast.error(`Lỗi: ${error.message}`);
         } finally {
@@ -78,6 +93,7 @@ const EditCategoriesDialog = ({ open, handleClose, categoriesIds }) => {
                         {categoryLoading ? (
                             <HashLoader size={35} color="#36D7B7" />
                         ) : (
+                            <div>
                             <div className="flex gap-3 items-center">
                                 <label className="form__label">Tên danh mục:</label>
                                 <input
@@ -88,6 +104,39 @@ const EditCategoriesDialog = ({ open, handleClose, categoriesIds }) => {
                                     placeholder="Nhập tên danh mục mới..."
                                     className="border-2 py-3 px-2 border-solid rounded-lg focus:outline-none flex-grow"
                                 />
+                            </div>
+                            <div className="flex gap-3 items-center mt-2">
+                            <label className="form__label">Nhóm danh mục:</label>
+                            <input
+                                name="group"
+                                onChange={handleInputChange}
+                                value={formData.group}
+                                type="text"
+                                placeholder="Nhập tên danh mục mới..."
+                                className="border-2 py-3 px-2 border-solid rounded-lg focus:outline-none flex-grow"
+                            />
+                            </div>
+                            <div className="mb-5 items-center gap-3 flex">
+                                {selectedFile && 
+                                <figure className="w-[60px] h-[60px]  rounded-full  border-2 border-solid border-primaryColor
+                                flex items-center justify-content">
+                                    <img src={previewURL} alt="" className="w-full rounded-full"/>
+                                </figure>}
+                                <div className="relative w-[130px] h-[50px]">
+                                    <input type="file"
+                                    name="photo"
+                                    id="customfile"
+                                    accept=".jpg, .png"
+                                    onChange={ handleFileInputChange}
+                                    className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer" />
+                                    <label htmlFor="customfile"className="absolute top-0 left-0 w-full h-full
+                                    flex items-center px-[0.75rem] py-[0.375rem] text-[15px] leading-6 overflow-hidden bg-[#0066ff46] text-headingColor
+                                    font-semibold rounded-lg truncate cursor-pointer">
+                                      Tải ảnh
+                                    </label>
+                                </div>
+
+                            </div>
                             </div>
                         )}
                     </DialogBody>

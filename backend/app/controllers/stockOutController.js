@@ -71,6 +71,7 @@ const createStockOut = async (req, res) => {
             employeeGive:employeeGive,
             products: stockOutProducts,
             quantity: totalQuantity,
+            location:locationId,
             dateOut,
             status,
 
@@ -103,5 +104,15 @@ const getStockOut = async (req, res) => {
         res.status(500).json({ success: false, message: "Lỗi server" });
     }
 };
+const getStockOutByIdLocation = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const stockOut = await StockOutSModel.find({location:id});
+        res.status(200).json({ success: true, data: stockOut });
+    } catch (error) {
+        console.error("Lỗi máy chủ", error.message);
+        res.status(500).json({ success: false, message: "Lỗi server" });
+    }
+};
 
-module.exports = { createStockOut, getStockOut };
+module.exports = { createStockOut, getStockOut,getStockOutByIdLocation };

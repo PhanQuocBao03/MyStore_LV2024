@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useContext, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { FaSignOutAlt } from 'react-icons/fa';
 import { authContext } from "../../context/AuthContext";
@@ -26,9 +26,10 @@ import {
   AccordionBody,
 } from "@material-tailwind/react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { BASE_URL, token } from "../../../config";
 
 const navLinks = [
-  { path: '/home', display: 'Thống kê', src: chartFill },
+  { path: '/dashboard', display: 'Thống kê', src: chartFill },
   { path: '/user', display: 'Khách hàng', src: userImg },
   { path: '/employee', display: 'Nhân viên', src: employee },
   { path: '/product', display: 'Sản phẩm', src: productImg, gap: true },
@@ -64,22 +65,41 @@ const NavItem = ({ path, display, src, gap, isSidebarOpen, accordionId, onAccord
 );
 
 const LeftSideBar = () => {
+  const users = useMemo(() => JSON.parse(localStorage.getItem('user')), []);
+
   const { dispatch } = useContext(authContext);
   const navigate = useNavigate();
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [activeAccordionId, setActiveAccordionId] = useState(0);
 
   // Xử lý đăng xuất
-  const handleLogout = () => {
-      if (window.confirm("Bạn có chắc chắn muốn đăng xuất?")) {
-          try {
-              dispatch({ type: 'LOGOUT' });
-              navigate("/login");
-          } catch (error) {
-              console.error("Đăng xuất thất bại:", error);
-          }
-      }
-  };
+  const handleLogout = async () => {
+   
+
+    if (window.confirm("Bạn có chắc chắn muốn đăng xuất?")) {
+        try {
+            // Gọi API để cập nhật trạng thái đăng xuất trong cơ sở dữ liệu
+            const res = await fetch(`${BASE_URL}/auth/logout`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ userId: users._id }), // Gửi userId trong body
+            });
+
+            if (!res.ok) {
+                throw new Error("Không thể đăng xuất từ máy chủ.");
+            }
+
+            // Cập nhật AuthContext và localStorage
+            dispatch({ type: 'LOGOUT' });
+            navigate("/login");
+        } catch (error) {
+            console.error("Đăng xuất thất bại:", error);
+        }
+    }
+};
 
   // Xử lý mở/đóng Accordion
   const toggleAccordion = (accordionId) => {
@@ -95,7 +115,7 @@ const LeftSideBar = () => {
   return (
     <section
     id="leftSideBar"
-      className={`relative p-5 pt-8 duration-300 h-full bg-primaryColor text-white ${isSidebarOpen ? "w-52" : "w-20"}`}
+      className={`relative p-5 pt-8 duration-300 bg-primaryColor text-white ${isSidebarOpen ? "w-52" : "w-20 "}`}
     >
       <img
         src={control}
@@ -131,7 +151,7 @@ const LeftSideBar = () => {
                       <ListItemPrefix className="mr-0">
                         <img src={whouse} className="w-4 h-4" alt="" />
                       </ListItemPrefix>
-                      <Typography  className={`${!isSidebarOpen && "hidden"} mr-auto ml-4  font-normal text-white `}>
+                      <Typography  className={`${!isSidebarOpen && "hidden"} mr-auto ml-4 text-[16px]  font-normal text-white `}>
                         {link.display}
                       </Typography>
                     </AccordionHeader>

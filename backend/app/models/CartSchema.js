@@ -26,7 +26,7 @@ CartSchema.pre(/^find/, function (next) {
         select: 'name address phone'
     }).populate({
         path: 'products.product',
-        select: 'name price size color discount'
+        select: 'name price size color discount photo'
     }); // Thay đổi đây để populate đúng
     next();
 });

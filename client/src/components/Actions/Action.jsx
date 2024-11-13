@@ -12,8 +12,6 @@ const Action = ({ id, type }) => { // Thêm prop type để phân biệt loại 
     const [openEdit, setOpenEdit] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
-
-    console.log("checkId",id)
     
 
     

@@ -32,10 +32,9 @@ const StockOutSchema = new mongoose.Schema({
 
     }],
     location: { // Lưu dạng object thay vì ObjectId
-        type: { type: String },
-        rack: String,
-        pallet: String,
-        level: Number
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Location',  // Giả sử có mô hình Product
+        required: true
     },
     status: {
         type: String,
@@ -59,8 +58,11 @@ StockOutSchema.pre(/^find/, function(next) {
         select: 'name employeeId phone' // Hạn chế thông tin employeeGive nếu cần
     }).populate({
         path: 'products.product',
-        select: 'name photo manuFacture'
-    });
+        select: 'name photo manuFacture price'
+    }).populate({
+        path: 'location', // Sửa lỗi để populate đúng location
+        select: 'zone rack pallet type level products'
+    });;
     next();
 });
 const StockOutModel = mongoose.model("StockOut",StockOutSchema);

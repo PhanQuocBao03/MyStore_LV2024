@@ -201,7 +201,9 @@ table tr:nth-child(even){
   .warring{
     display: block !important;
   }
+ 
 }
+
 #leftSideBar span {
   margin-left: 0 !important;
 }

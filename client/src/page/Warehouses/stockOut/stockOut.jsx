@@ -11,10 +11,11 @@ import { BiPlus, BiPrinter } from "react-icons/bi";
 import Inventory from "../inventory/inventory";
 import useFetchData from "../../../Hook/userFecthData";
 import { AiOutlineDelete } from "react-icons/ai";
+import PrintStockOut from "./printStockOut";
 
 const StockOut = ({ handleClose, locations, stockIns }) => {
     const { data: employees } = useFetchData(`${BASE_URL}/employee`);
-    // const { data: products } = useFetchData(`${BASE_URL}/product`);
+    const { data: stockOuts } = useFetchData(`${BASE_URL}/stockOut/getLocationId/${locations._id}`);
     const employee = useMemo(() => JSON.parse(localStorage.getItem('user')), []);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -214,6 +215,7 @@ const StockOut = ({ handleClose, locations, stockIns }) => {
                             </div>
                             <div className="flex items-center justify-start  mx-auto w-1/2 mt-5 ">
                                 <p className="italic font-bold">Thông tin sản phẩm</p>
+
                                 <div className="ml-4" >
 
                                 <button onClick={addProducts} className="bg-[#000] rounded-full   text-white cursor-pointer">
@@ -276,9 +278,18 @@ const StockOut = ({ handleClose, locations, stockIns }) => {
                     <div className="bg-blue-500 h-5 mt-2"></div>
                     <div>
                         <Inventory stockIn={stockIns} location={locations} />
+
                     </div>
+                    
+                    {print && <PrintStockOut stockOut={stockOuts} />}
+                    
+
+
                 </div>
             </div>
+            
+
+            
 
         </>
     );

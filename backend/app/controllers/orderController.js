@@ -1,31 +1,32 @@
+const CartModel = require('../models/CartSchema');
 const Order = require('../models/OrderSchema');
 const Product = require('../models/ProductSchema');
+const PromotionModel = require('../models/PromotionSchema');
 const User = require('../models/UserSchema')
 
 const moment = require('moment');
 
 const createOrder = async (req, res) => {
     try {
-        const { userId, products,phone,address,name,note } = req.body;
+        const { userId, products, phone, address, name, note, payment, totalAmountAfterDiscount, discount, totalSale, promotionId } = req.body;
 
-        // Kiểm tra xem các sản phẩm có tồn tại và số lượng có đủ không
         const orderProducts = [];
         let totalAmount = 0;
 
-        for (const item of products) {
+        const productPromises = products.map(async (item) => {
             const { productId, quantity } = item;
             const product = await Product.findById(productId);
             
             if (!product) {
-                return res.status(404).json({ success: false, message: `Sản phẩm ${productId} không tồn tại!` });
+                throw new Error(`Sản phẩm ${productId} không tồn tại!`);
             }
 
             if (quantity > product.stock) {
-                return res.status(400).json({ message: `Số lượng sản phẩm ${productId} không đủ!` });
+                throw new Error(`Số lượng sản phẩm ${productId} không đủ!`);
             }
 
             // Tính toán tổng tiền cho sản phẩm
-            totalAmount += quantity * product.price  - ((quantity * product.price) * (product.discount/100));
+            totalAmount += quantity * product.price - ((quantity * product.price) * (product.discount / 100));
 
             // Thêm thông tin sản phẩm vào mảng orderProducts
             orderProducts.push({ product: productId, quantity });
@@ -33,9 +34,32 @@ const createOrder = async (req, res) => {
             // Cập nhật số lượng tồn kho
             product.stock -= quantity;
             await product.save();
+        });
+
+        // Chờ tất cả các promises (sản phẩm) hoàn thành
+        await Promise.all(productPromises);
+
+        // Kiểm tra và giảm số lượng voucher nếu có
+        if (promotionId) {
+            const promotion = await PromotionModel.findById(promotionId);
+            if (promotion) {
+                promotion.quantity -= 1;
+                await promotion.save();
+            }
         }
 
-        // Tạo orderId
+        // Cập nhật điểm cho người dùng nếu có
+        if (totalAmountAfterDiscount > 0) {
+            let userPoint = totalAmountAfterDiscount / 100;
+            if (discount > 0) {
+                userPoint -= discount;
+            }
+            const user = await User.findById(userId);
+            user.point += userPoint;
+            await user.save();
+        }
+
+        // Tạo mã đơn hàng
         const today = moment().format('DDMMYY');
         const orderCount = await Order.countDocuments({ createdAt: { $gte: moment().startOf('day'), $lt: moment().endOf('day') } });
         const orderId = `VN-${today}${(orderCount + 1).toString().padStart(3, '0')}`;
@@ -45,20 +69,41 @@ const createOrder = async (req, res) => {
             user: userId,
             products: orderProducts,
             orderID: orderId,
-            totalAmount,
-            phone:phone,
-            address:address,
-            name:name,
-            note:note,
+            salePrice: totalSale,
+            totalAmount: totalAmountAfterDiscount,
+            payment: payment || 'COD',
+            phone,
+            address,
+            name,
+            note,
         });
 
         await order.save();
-        res.status(200).json({ success: true,message:'Tạo đơn hàng thành công', data: order });
+
+        // Tìm và xóa sản phẩm khỏi giỏ hàng
+        const cart = await CartModel.findOne({ user: userId });
+
+        if (!cart) {
+            return res.status(404).json({ success: false, message: 'Giỏ hàng không tìm thấy' });
+        }
+
+        // Duyệt qua từng sản phẩm trong đơn hàng và xóa khỏi giỏ hàng
+        const productIdsInOrder = products.map(item => item.productId.toString());
+
+        // Xóa các sản phẩm đã đặt trong đơn hàng khỏi giỏ hàng
+        cart.products = cart.products.filter(item => !productIdsInOrder.includes(item.product._id.toString()));
+
+        // Lưu giỏ hàng sau khi xóa sản phẩm
+        await cart.save();
+
+        res.status(200).json({ success: true, message: 'Tạo đơn hàng thành công', data: order });
     } catch (error) {
         console.error('Lỗi máy chủ', error);
-        res.status(500).json({ success: false, message: "Lỗi server" });
+        res.status(500).json({ success: false, message: error.message || "Lỗi server" });
     }
 };
+
+
 
 const getOrder = async (req, res) => {
     try {
@@ -104,6 +149,22 @@ const getOneOrder = async(req,res)=>{
     try {
         const orderId = req.params.id
         const orders = await Order.findById(orderId);
+        if(!orders){
+            return res.status(404).json({success:false,message:"Đơn hàng không tồn tại"})
+        }
+        res.status(200).json({success:true,data:orders})
+    } catch (error) {
+        console.log('Lỗi lấy đơn hàng',error);
+        res.status(500).json({success:false,message:'Lỗ không lấy được đơn hàng'})
+        
+    }
+
+}
+
+const getOneOrderWithUserId = async(req,res)=>{
+    try {
+        const userId = req.params.userId;
+        const orders = await Order.find({user:userId});
         if(!orders){
             return res.status(404).json({success:false,message:"Đơn hàng không tồn tại"})
         }
@@ -183,10 +244,10 @@ const deleteManyOrder = async (req, res) => {
             return res.status(404).json({ success: false, error: 'Không tìm thấy đơn hàng nào để xóa!' });
         }
 
-        res.status(200).json({ success: true, message: "Đã xóa đơn hàng thành công", deletedCount: result.deletedCount });
+        return res.status(200).json({ success: true, message: "Đã xóa đơn hàng thành công", deletedCount: result.deletedCount });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message }); // Trả về mã lỗi 500 cho lỗi máy chủ
     }
 }
 
-module.exports = { createOrder, getOrder,getOneOrder,updateOrder,deleteOrder,deleteManyOrder };
+module.exports = { createOrder, getOrder,getOneOrder,updateOrder,deleteOrder,deleteManyOrder,getOneOrderWithUserId };

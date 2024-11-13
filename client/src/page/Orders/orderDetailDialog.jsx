@@ -48,7 +48,7 @@ const OrderDetailDialog = ({ open, handleClose, orderId }) => {
 
     const calculateTotalAmount = (products) => {
         return products.reduce((total, item) => {
-            const itemTotal = (item.product.price * item.quantity) - ((item.product.price * item.quantity) * (item.product.discount / 100));
+            const itemTotal = (item.product?.price * item.quantity) - ((item.product?.price * item.quantity) * (item.product?.discount / 100));
             return total + itemTotal;
         }, 0);
     };
@@ -65,7 +65,9 @@ const OrderDetailDialog = ({ open, handleClose, orderId }) => {
         let newStatus;
         if (formData.status === 'Đang xử lý') {
             newStatus = 'Chờ vận chuyển';
-        } 
+        }  else if (formData.status === 'Chờ vận chuyển') {
+            newStatus = 'Chờ thanh toán';
+        }
         else if (formData.status === 'Chờ thanh toán') {
             newStatus = 'Chờ thanh toán';
         } else {
@@ -265,12 +267,12 @@ const OrderDetailDialog = ({ open, handleClose, orderId }) => {
                                     {formData.products.map((item, index) => (
                                         <tr key={index}>
                                             <td className='border-2 border-slate-300'>{index + 1}</td>
-                                            <td className='border-2 border-slate-300'>{item.product.name}</td>
+                                            <td className='border-2 border-slate-300'>{item.product?.name}</td>
                                             <td className='border-2 border-slate-300'>{item.quantity}</td>
-                                            <td className='border-2 border-slate-300'>{item.product.discount}%</td>
-                                            <td className='border-2 border-slate-300'>{FormatPrice(item.product.price)}</td>
+                                            <td className='border-2 border-slate-300'>{item.product?.discount}%</td>
+                                            <td className='border-2 border-slate-300'>{FormatPrice(item.product?.price)}</td>
                                             <td className='border-2 border-slate-300'>
-                                                {FormatPrice((item.product.price * item.quantity) - ((item.product.price * item.quantity) * (item.product.discount / 100)))}
+                                                {FormatPrice((item.product?.price * item.quantity) - ((item.product?.price * item.quantity) * (item.product?.discount / 100)))}
                                             </td>
                                         </tr>
                                     ))}
@@ -288,7 +290,7 @@ const OrderDetailDialog = ({ open, handleClose, orderId }) => {
                                         <td></td>
                                         <td className='border-2 border-r-0 border-slate-300 text-end'></td>
                                         <td className='border-2 border-l-0 border-slate-300 text-end'>Voucher:</td>
-                                        <td className='border-2 border-l-0 border-slate-300 text-end'></td>
+                                        <td className='border-2 border-l-0 border-slate-300 text-end italic'>Thiếu hiển thị</td>
                                     </tr>
                                     <tr>
                                         <td></td>

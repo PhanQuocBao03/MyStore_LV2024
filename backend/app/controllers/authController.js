@@ -97,6 +97,7 @@ const login = async (req, res) => {
         let user = null;
         const userInDb = await User.findOne({ email });
         const employeeInDb = await Employee.findOne({ email });
+        
         if (userInDb) {
             user = userInDb;
         } else if (employeeInDb) {
@@ -114,16 +115,35 @@ const login = async (req, res) => {
             return res.status(400).json({ status: false, message: 'Mật khẩu không đúng' });
         }
 
+        // Cập nhật lastActiveAt và trạng thái online
+        user.lastActiveAt = new Date();
+        user.status = "on";
+        await user.save();
+
         // Tạo token
         const token = generateToken(user);
 
         // Trả về thông tin người dùng
-        const { password,role, ...rest } = user._doc;
-        res.status(200).json({ status: true, message: 'Đăng nhập thành công', token, data: { ...rest },role });
+        const { password, role, ...rest } = user._doc;
+        res.status(200).json({ status: true, message: 'Đăng nhập thành công', token, data: { ...rest }, role });
     } catch (error) {
         console.error('Lỗi đăng nhập phía server:', error);
         res.status(500).json({ status: false, message: 'Đăng nhập thất bại' });
     }
 };
+const logout = async (req, res) => {
+    try {
+        const { userId } = req.body;
+        // Cập nhật status thành "off" cho người dùng khi đăng xuất
+        await User.findByIdAndUpdate(userId, { status: "off",lastActiveAt: new Date() });
 
-module.exports = { register, login };
+        res.status(200).json({ message: "Đăng xuất thành công" });
+    } catch (error) {
+        console.error('Lỗi đăng xuất:', error);
+        res.status(500).json({ message: "Đăng xuất thất bại" });
+    }
+};
+
+
+
+module.exports = { register, login,logout };
